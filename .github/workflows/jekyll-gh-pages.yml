@@ -26,18 +26,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code（检出代码）
         uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+      - name: Setup Node.js (设置 node 版本)
+        uses: actions/setup-node@v3
         with:
-          source: ./
-          destination: ./_site
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-
+          node-version: 16
+      - name: Install dependencies (安装依赖)
+        run: npm install
+      - name: Build (构建)
+        run: npm run build
+      - name:  Upload build artifacts (上传构建产物)
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: "./dist"
   # Deployment job
   deploy:
     environment:
@@ -47,5 +49,8 @@ jobs:
     needs: build
     steps:
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true
